@@ -1,6 +1,7 @@
 from create_rag import RAGPipeline
 import os 
 from dotenv import load_dotenv
+import time
 load_dotenv()
 
 if __name__ == "__main__":
@@ -8,12 +9,15 @@ if __name__ == "__main__":
     persistent_dir = os.getenv("PERSISTENT_DIR")
     embeddings_model = os.getenv("EMBEDDINGS_MODEL")
     llm_model = os.getenv("LLM_MODEL")
+    start_time = time.time()
     rag_pipeline = RAGPipeline(
         rag_dir=rag_dir,    
         persist_dir=persistent_dir,
         embeddings_model=embeddings_model,
         llm_model=llm_model
     )
+    end_time = time.time()
+    print(f"RAG Pipeline setup time: {end_time - start_time} seconds")
     print("RAG Pipeline is set up and ready to use!")
     
     
