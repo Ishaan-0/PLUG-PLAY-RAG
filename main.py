@@ -17,7 +17,11 @@ if __name__ == "__main__":
         llm_model=llm_model
     )
     end_time = time.time()
+<<<<<<< HEAD
     print(f"Time taken to set up RAG Pipeline: {end_time - start_time} seconds")
+=======
+    print(f"RAG Pipeline setup time: {end_time - start_time} seconds")
+>>>>>>> main
     print("RAG Pipeline is set up and ready to use!")
     
     
