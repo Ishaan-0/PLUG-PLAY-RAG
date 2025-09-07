@@ -1,4 +1,4 @@
-from vector_db import VectorDB
+from database.vector_db import VectorDB
 from typing import List, Dict, Optional
 from langchain.schema import Document
 class Retriever:

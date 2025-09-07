@@ -1,5 +1,5 @@
 from langchain.document_loaders import PyPDFLoader, TextLoader, Docx2txtLoader
-from custom_pdf_processor import CustomPDFProcessor
+from database.custom_pdf_processor import CustomPDFProcessor
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from langchain.schema import Document

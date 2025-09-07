@@ -1,4 +1,4 @@
-from create_rag import RAGPipeline
+from rag_pipeline.create_rag import RAGPipeline
 import os 
 from dotenv import load_dotenv
 import time
