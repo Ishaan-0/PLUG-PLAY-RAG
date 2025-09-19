@@ -149,7 +149,7 @@ class VectorManager:
                 return {
                     "collection_name": collection_name,
                     "total_docs": 0,
-                    "doc_types": {},
+                    "file_types": {},
                     "total_chunks": 0
                 }
             
@@ -157,14 +157,14 @@ class VectorManager:
             metadatas = result.get('metadatas', [])
             
             # Count document types and unique sources
-            doc_types = {}
+            file_types = {}
             unique_sources = set()
             
             for metadata in metadatas:
                 if metadata:
                     # Count doc types
-                    doc_type = metadata.get("doc_type", "unknown")
-                    doc_types[doc_type] = doc_types.get(doc_type, 0) + 1
+                    file_type = metadata.get("file_type", "unknown")
+                    file_types[file_type] = file_types.get(file_type, 0) + 1
                     
                     # Track unique source documents
                     source = metadata.get('source', 'unknown')
@@ -173,7 +173,7 @@ class VectorManager:
             return {
                 "collection_name": collection_name,
                 "total_docs": len(unique_sources),
-                "doc_types": doc_types,
+                "file_types": file_types,
                 "total_chunks": len(ids)
             }
             

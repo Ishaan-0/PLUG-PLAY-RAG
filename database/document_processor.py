@@ -33,8 +33,8 @@ class DocumentProcessor:
             text = loader.extract_text()
             doc = Document(page_content=text, metadata={
                 'source': file_name,
-                'doc_name': file_name,
-                'doc_type': 'pdf',
+                'file_name': file_name,
+                'file_type': 'pdf',
                 'file_size': Path(file_path).stat().st_size
             })
             return [doc]
