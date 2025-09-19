@@ -259,32 +259,33 @@ else:
             else:
                 st.write("No document type information available")
 
-            # Delete Collection Button
-            st.markdown('<div class="danger-zone">', unsafe_allow_html=True)
-            st.markdown("##### ⚠️ Danger Zone")
-            st.markdown("Permanently delete this collection and all its data.")
+            # Delete Collection Section - properly contained within expander
+            st.markdown("---")
             
-            delete_key = f"delete_{collection_name}"
-            confirm_key = f"confirm_delete_{collection_name}"
-            
-            if st.button(f"🗑️ Delete {collection_name}", key=delete_key):
-                if st.session_state.get(confirm_key):
-                    try:
-                        result = manager.delete_collection(collection_name)
-                        if "success" in result:
-                            st.success(f"Collection '{collection_name}' deleted!")
-                            st.session_state.pop(confirm_key, None)
-                            st.rerun()
-                        else:
-                            st.error(result.get("error", "Unknown error"))
-                    except Exception as e:
-                        st.error(f"Error deleting collection: {e}")
-                else:
-                    st.session_state[confirm_key] = True
-                    st.warning(f"⚠️ Click the delete button again to confirm deletion of '{collection_name}'")
-                    st.rerun()
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+            # Create a container for the danger zone
+            with st.container():
+                st.markdown("##### ⚠️ Danger Zone")
+                st.markdown("Permanently delete this collection and all its data.")
+                
+                delete_key = f"delete_{collection_name}"
+                confirm_key = f"confirm_delete_{collection_name}"
+                
+                if st.button(f"🗑️ Delete {collection_name}", key=delete_key):
+                    if st.session_state.get(confirm_key):
+                        try:
+                            result = manager.delete_collection(collection_name)
+                            if "success" in result:
+                                st.success(f"Collection '{collection_name}' deleted!")
+                                st.session_state.pop(confirm_key, None)
+                                st.rerun()
+                            else:
+                                st.error(result.get("error", "Unknown error"))
+                        except Exception as e:
+                            st.error(f"Error deleting collection: {e}")
+                    else:
+                        st.session_state[confirm_key] = True
+                        st.warning(f"⚠️ Click the delete button again to confirm deletion of '{collection_name}'")
+                        st.rerun()
 
 # Footer
 st.markdown("---")

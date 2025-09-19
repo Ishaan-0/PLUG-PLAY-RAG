@@ -238,9 +238,10 @@ if selected_collection:
     if selected_collection not in st.session_state.chat_histories:
         st.session_state.chat_histories[selected_collection] = []
     
-    # Get RAG pipeline
+    # Get RAG pipeline with better error handling
     rag_pipeline = None
     source_dir = get_source_directory_for_collection(vector_manager, selected_collection)
+    
     if source_dir:
         try:
             with st.spinner("📄 Loading collection..."):
@@ -250,8 +251,15 @@ if selected_collection:
                     embeddings_model=os.getenv("EMBEDDINGS_MODEL"),
                     llm_model=os.getenv("LLM_MODEL"),
                 )
+                st.success("✅ Collection loaded successfully!")
         except Exception as e:
             st.error(f"❌ Error loading collection: {str(e)}")
+            st.error(f"Source directory: {source_dir}")
+            st.error(f"Persistent directory: {os.getenv('PERSISTENT_DIR')}")
+            st.error(f"Embeddings model: {os.getenv('EMBEDDINGS_MODEL')}")
+            st.error(f"LLM model: {os.getenv('LLM_MODEL')}")
+    else:
+        st.error(f"❌ Could not find source directory for collection '{selected_collection}'")
     
     # Chat interface
     current_messages = st.session_state.chat_histories[selected_collection]
@@ -285,39 +293,90 @@ if selected_collection:
     # Chat input at the bottom
     st.markdown("### 💭 Ask a question:")
     
-    # Use form for better UX
-    with st.form("chat_form", clear_on_submit=True):
-        user_input = st.text_area(
-            "Message",
-            height=100,
-            placeholder="Ask me anything about your documents...",
-            key="user_input"
-        )
-        
-        col1, col2 = st.columns([1, 5])
-        with col1:
-            send_clicked = st.form_submit_button("Send", disabled=not user_input.strip())
-        with col2:
-            if st.form_submit_button("🗑️ Clear Chat"):
-                st.session_state.chat_histories[selected_collection] = []
-                st.rerun()
+    # Create two separate elements: one for Enter key detection and one for form submission
+    user_input = st.text_area(
+        "Message",
+        height=100,
+        placeholder="Ask me anything about your documents... (Press Ctrl+Enter to send)",
+        key="chat_input"
+    )
+    
+    # Buttons for manual submission
+    col1, col2 = st.columns([1, 5])
+    with col1:
+        send_clicked = st.button("Send", disabled=not user_input.strip())
+    with col2:
+        if st.button("🗑️ Clear Chat"):
+            st.session_state.chat_histories[selected_collection] = []
+            st.rerun()
+    
+    # Add JavaScript for Enter key handling
+    st.markdown("""
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const textArea = document.querySelector('textarea[aria-label="Message"]');
+        if (textArea) {
+            textArea.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    const sendButton = document.querySelector('button[kind="primary"]:has-text("Send")');
+                    if (sendButton && !sendButton.disabled) {
+                        sendButton.click();
+                    }
+                }
+            });
+        }
+    });
+    </script>
+    """, unsafe_allow_html=True)
     
     # Handle message sending
-    if send_clicked and rag_pipeline and user_input.strip():
-        # Add user message
-        current_messages.append({"role": "user", "content": user_input})
-        
-        # Generate response
-        with st.spinner("🤔 Thinking..."):
+    if send_clicked and user_input.strip():
+        if not rag_pipeline:
+            st.error("❌ RAG pipeline not loaded. Please check your collection setup.")
+        else:
             try:
-                response = rag_pipeline.ask_detailed(user_input)
-                answer = response.get("answer", "I couldn't generate an answer.")
-                current_messages.append({"role": "assistant", "content": answer})
+                # Add user message and update session state
+                current_messages.append({"role": "user", "content": user_input})
+                st.session_state.chat_histories[selected_collection] = current_messages
+                
+                # Generate response
+                with st.spinner("🤔 Thinking..."):
+                    response = rag_pipeline.ask_detailed(user_input)
+                    answer = response.get("answer", "I couldn't generate an answer.")
+                    
+                    # Add assistant message and update session state
+                    current_messages.append({"role": "assistant", "content": answer})
+                    st.session_state.chat_histories[selected_collection] = current_messages
+                
+                # Update the UI
+                for message in current_messages:
+                    if message["role"] == "user":
+                        st.markdown(f"""
+                        <div class="user-message">
+                            <strong>You:</strong><br>
+                            {message["content"]}
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"""
+                        <div class="assistant-message">
+                            <strong>Assistant:</strong><br>
+                            {message["content"]}
+                        </div>
+                        """, unsafe_allow_html=True)
+                
+                # Clear input (using a new key to force reset)
+                st.session_state["chat_input"] = ""
+                
             except Exception as e:
                 error_msg = f"❌ Sorry, I encountered an error: {str(e)}"
                 current_messages.append({"role": "assistant", "content": error_msg})
-        
-        st.rerun()
+                st.session_state.chat_histories[selected_collection] = current_messages
+                st.error(f"Debug info: {str(e)}")
+            
+            # Force refresh without using rerun
+            st.rerun()
 
 else:
     st.info("👆 Please select a collection to start chatting.")
