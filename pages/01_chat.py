@@ -10,51 +10,154 @@ load_dotenv()
 
 st.set_page_config(
     page_title="Chat Interface",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for chat interface
+# Dark mode chat interface styling
 st.markdown("""
 <style>
-.chat-container {
-    height: 60vh;
-    overflow-y: auto;
-    padding: 1rem;
-    background: white;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    margin-bottom: 1rem;
+/* Hide default sidebar */
+section[data-testid="stSidebar"] {
+    display: none !important;
 }
 
+/* Global dark theme */
+.stApp {
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+/* Remove all white backgrounds */
+.main .block-container {
+    background: transparent !important;
+    padding-top: 2rem;
+}
+
+/* Navigation button styling */
+.stButton > button {
+    background: #1e293b !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #334155 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+}
+
+.stButton > button:hover {
+    background: #334155 !important;
+    border-color: #3b82f6 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Message styling */
 .user-message {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 0.75rem 1rem;
-    border-radius: 18px 18px 4px 18px;
-    margin: 0.5rem 0 0.5rem auto;
-    max-width: 70%;
-    word-wrap: break-word;
-    text-align: right;
+    background: #1e3a8a !important;
+    color: white !important;
+    padding: 1rem !important;
+    border-radius: 12px 12px 4px 12px !important;
+    margin: 0.5rem 0 0.5rem auto !important;
+    max-width: 80% !important;
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3) !important;
 }
 
 .assistant-message {
-    background: #f8fafc;
-    color: #1a202c;
-    padding: 0.75rem 1rem;
-    border-radius: 18px 18px 18px 4px;
-    margin: 0.5rem auto 0.5rem 0;
-    max-width: 70%;
-    word-wrap: break-word;
-    border: 1px solid #e2e8f0;
-    text-align: left;
+    background: #1e293b !important;
+    color: #e2e8f0 !important;
+    padding: 1rem !important;
+    border-radius: 12px 12px 12px 4px !important;
+    margin: 0.5rem auto 0.5rem 0 !important;
+    max-width: 80% !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
+/* Selectbox styling */
+.stSelectbox > div > div {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    color: #e2e8f0 !important;
+}
+
+.stSelectbox > div > div > div {
+    color: #e2e8f0 !important;
+}
+
+.stSelectbox label {
+    color: #f1f5f9 !important;
+}
+
+/* Text area styling */
+.stTextArea > div > div > textarea {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    border-radius: 12px !important;
+    color: #e2e8f0 !important;
+    font-size: 16px !important;
+}
+
+.stTextArea > div > div > textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 1px #3b82f6 !important;
+}
+
+.stTextArea label {
+    color: #f1f5f9 !important;
+    font-weight: 600 !important;
+}
+
+/* Collection info */
 .collection-info {
-    background: linear-gradient(90deg, #f0f9ff, #e0f2fe);
-    padding: 1rem;
-    border-radius: 8px;
-    border-left: 4px solid #0ea5e9;
-    margin-bottom: 1rem;
+    background: #064e3b !important;
+    border: 1px solid #065f46 !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    margin: 1rem 0 !important;
+    color: #10b981 !important;
+}
+
+/* Form styling */
+div[data-testid="stForm"] {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Chat form button styling */
+.stForm button[type="submit"] {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.75rem 2rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+.stForm button[type="submit"]:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Text color overrides */
+h1, h2, h3, h4, h5, h6 {
+    color: #f1f5f9 !important;
+}
+
+p {
+    color: #cbd5e1 !important;
+}
+
+/* Warning and info styling */
+div[data-testid="stAlert"] {
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+/* Spinner styling */
+div[data-testid="stSpinner"] {
+    color: #3b82f6 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -79,7 +182,7 @@ try:
     vector_manager = VectorManager(vector_db)
     collections = vector_manager.list_collections()
 except Exception as e:
-    st.error(f"❌ Database Error: {str(e)}")
+    st.error(f"Database Error: {str(e)}")
     collections = []
 
 # Initialize session state
@@ -92,8 +195,22 @@ if "current_collection" not in st.session_state:
 st.title("💬 Chat Interface")
 st.markdown("*Engage in intelligent conversations with your document collections*")
 
+# Navigation buttons
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button("🏠 Home"):
+        st.switch_page("main_streamlit.py")
+with col2:
+    if st.button("➕ Create Collection"):
+        st.switch_page("pages/02_create_rag_folder.py")
+with col3:
+    if st.button("📊 Database Stats"):
+        st.switch_page("pages/03_database_stats.py")
+
+st.markdown("---")
+
 if not collections:
-    st.warning("📝 No collections found. Create one first!")
+    st.warning("📁 No collections found. Create one first!")
     if st.button("➕ Create Collection", type="primary"):
         st.switch_page("pages/02_create_rag_folder.py")
     st.stop()
@@ -126,7 +243,7 @@ if selected_collection:
     source_dir = get_source_directory_for_collection(vector_manager, selected_collection)
     if source_dir:
         try:
-            with st.spinner("🔄 Loading collection..."):
+            with st.spinner("📄 Loading collection..."):
                 rag_pipeline = RAGPipeline(
                     rag_dir=source_dir,
                     persist_dir=os.getenv("PERSISTENT_DIR"),
@@ -140,34 +257,52 @@ if selected_collection:
     current_messages = st.session_state.chat_histories[selected_collection]
     
     # Display chat history
-    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    st.markdown("### 💬 Conversation")
+    
     if not current_messages:
-        st.markdown("""
-        <div style="text-align: center; padding: 2rem; color: #64748b;">
-            <h4>👋 Ready to chat!</h4>
-            <p>Ask me anything about your documents.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.info("👋 Ready to chat! Ask me anything about your documents.")
     
-    for message in current_messages:
-        if message["role"] == "user":
-            st.markdown(f'<div class="user-message">💬 {message["content"]}</div>', unsafe_allow_html=True)
-        else:
-            st.markdown(f'<div class="assistant-message">🤖 {message["content"]}</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Create a container for messages
+    chat_container = st.container()
     
-    # Chat input
-    col1, col2 = st.columns([6, 1])
-    with col1:
-        user_input = st.text_input(
-            "",
-            key="user_input",
-            placeholder="💭 Ask me anything about your documents...",
-            label_visibility="collapsed"
+    with chat_container:
+        for i, message in enumerate(current_messages):
+            if message["role"] == "user":
+                st.markdown(f"""
+                <div class="user-message">
+                    <strong>You:</strong><br>
+                    {message["content"]}
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="assistant-message">
+                    <strong>Assistant:</strong><br>
+                    {message["content"]}
+                </div>
+                """, unsafe_allow_html=True)
+    
+    # Chat input at the bottom
+    st.markdown("### 💭 Ask a question:")
+    
+    # Use form for better UX
+    with st.form("chat_form", clear_on_submit=True):
+        user_input = st.text_area(
+            "Message",
+            height=100,
+            placeholder="Ask me anything about your documents...",
+            key="user_input"
         )
-    with col2:
-        send_clicked = st.button("Send", type="primary", disabled=not user_input.strip())
+        
+        col1, col2 = st.columns([1, 5])
+        with col1:
+            send_clicked = st.form_submit_button("Send", disabled=not user_input.strip())
+        with col2:
+            if st.form_submit_button("🗑️ Clear Chat"):
+                st.session_state.chat_histories[selected_collection] = []
+                st.rerun()
     
+    # Handle message sending
     if send_clicked and rag_pipeline and user_input.strip():
         # Add user message
         current_messages.append({"role": "user", "content": user_input})
@@ -183,31 +318,14 @@ if selected_collection:
                 current_messages.append({"role": "assistant", "content": error_msg})
         
         st.rerun()
-    
-    # Chat management
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🗑️ Clear Chat History"):
-            st.session_state.chat_histories[selected_collection] = []
-            st.success("🧹 Chat history cleared!")
-            st.rerun()
-    
-    with col2:
-        if st.button("📊 View Collection Stats"):
-            st.switch_page("pages/03_database_stats.py")
 
 else:
     st.info("👆 Please select a collection to start chatting.")
 
-# Navigation
+# Footer
 st.markdown("---")
-col1, col2, col3 = st.columns(3)
-with col1:
-    if st.button("🏠 Home"):
-        st.switch_page("main_streamlit.py")
-with col2:
-    if st.button("➕ Create Collection"):
-        st.switch_page("pages/02_create_rag_folder.py")
-with col3:
-    if st.button("📊 Database Stats"):
-        st.switch_page("pages/03_database_stats.py")
+st.markdown("""
+<div style="text-align: center; color: #64748b; padding: 1rem; border-top: 1px solid #334155;">
+    <strong>Universal RAG System</strong> • Built with Streamlit, Ollama & ChromaDB
+</div>
+""", unsafe_allow_html=True)
