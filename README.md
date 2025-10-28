@@ -26,10 +26,10 @@ A 100% local Retrieval-Augmented Generation (RAG) system that transforms any fol
 🎯 Why This Project?
 Traditional cloud-based RAG systems pose significant privacy risks when dealing with sensitive documents—financial records, medical files, legal documents, or proprietary business data. This project solves that problem by:
 
-✅ Ensuring data privacy through complete local processing
-✅ Eliminating cloud costs with open-source LLMs via Ollama
-✅ Enabling offline operation for air-gapped or restricted environments
-✅ Providing full customization with open-source components
+- ✅ Ensuring data privacy through complete local processing
+- ✅ Eliminating cloud costs with open-source LLMs via Ollama
+- ✅ Enabling offline operation for air-gapped or restricted environments
+- ✅ Providing full customization with open-source components
 
 Use Cases:
 
