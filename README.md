@@ -67,7 +67,7 @@ Installation
 Clone the repository:
 
 bash
-git clone https://github.com/yourusername/local-rag-system.git
+git clone https://github.com/Ishaan0/PLUG-PLAY-RAG.git
 cd local-rag-system
 Install dependencies:
 
